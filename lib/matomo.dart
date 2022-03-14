@@ -306,6 +306,14 @@ class MatomoTracker {
     ));
   }
 
+  static void trackOutlink(String outlink) {
+    final tracker = MatomoTracker();
+    tracker._track(_Event(
+      tracker: tracker,
+      outlink: outlink,
+    ));
+  }
+
   static void setCustomDimension(int dimensionId, String dimensionValue) {
     final tracker = MatomoTracker();
     tracker.customDimensions[dimensionId] = dimensionValue;
@@ -370,6 +378,7 @@ class _Event {
   final String? eventName;
   final int? eventValue;
   final int? goalId;
+  final String? outlink;
 
   // Ecommerce
   final String? orderId;
@@ -390,6 +399,7 @@ class _Event {
     this.eventName,
     this.eventValue,
     this.goalId,
+    this.outlink,
     this.orderId,
     this.trackingOrderItems,
     this.revenue,
@@ -430,7 +440,9 @@ class _Event {
     map['_idts'] =
         this.tracker.session.firstVisit!.millisecondsSinceEpoch ~/ 1000;
 
-    if (action != null) {
+    if (outlink != null) {
+      map['url'] = outlink;
+    } else if (action != null) {
       map['url'] = '${this.tracker.contentBase}/$action';
     } else {
       map['url'] = '${this.tracker.contentBase}';
@@ -453,6 +465,12 @@ class _Event {
     if (goalId != null) {
       map['idgoal'] = goalId;
     }
+
+    // Outlinks
+    if (outlink != null) {
+      map['link'] = outlink;
+    }
+
     if (revenue != null && revenue! > 0) {
       map['revenue'] = revenue;
     }
